@@ -1,78 +1,76 @@
 #include <iostream>
-#include <climits>
+#include <vector>
+#include <queue>
+
 using namespace std;
 
-const int node_count = 6;
+int node_count = 6;
+int INF = 1000000000;
+int dist[7];
+vector<pair<int, int>> graph[7];
 
-//find minimum distance
-int mini_dist_idx(int distance[], bool visit[])
+
+//dijkstra
+void dijkstra(int start)
 {
-    int minimum = INT_MAX;
-    int idx;
-
-    for(int i=0; i<node_count; ++i)
+    dist[start] = 0;
+    priority_queue<pair<int,int>> pq; //max heap structure
+    pq.push({start, 0});
+    while(!pq.empty())
     {
-        if(visit[i]==false && distance[i]<=minimum)
+        int current = pq.top().first;
+        //for reversal effect make it negative
+        int dis = -pq.top().second;
+        pq.pop();
+
+        if(dist[current] < dis) continue;
+        for(int i=0; i<graph[current].size(); ++i)
         {
-            minimum = distance[i];
-            idx = i;
-        }
-    }
-    return idx;
-}
-int print_solution(int dist[], int n)
-{
-    printf("Vertex   Distance from Source\n");
-    for (int i = 0; i < node_count; i++)
-        printf("%d \t\t %d\n", i, dist[i]);
-}
-
-void dijkstra(int graph[node_count][node_count], int start)
-{
-    int distance[6] = {INT_MAX}; //to store minimum distance for each node
-    bool visit[6] = {false}; //to mark visited node
-
-    for (int i = 0; i < node_count; i++)
-        distance[i] = INT_MAX, visit[i] = false;
-
-    // Distance of source vertex from itself is always 0
-    distance[start] = 0;
-
-    // Find shortest path for all vertices
-    for(int i=0; i<node_count-1; ++i)
-    {
-        int current = mini_dist_idx(distance, visit);
-        // Mark the picked vertex as processed
-        visit[current] = true;
-
-        // Update dist value of the adjacent vertices of the picked vertex.
-        for(int j=0; j<node_count; j++)
-        {
-            if(!visit[j] && graph[current][j] &&
-               distance[current]!=INT_MAX &&
-               distance[current]+graph[current][j] < distance[j])
+            int next = graph[current][i].first;
+            int cost = dis + graph[current][i].second;
+            if(cost < dist[next])
             {
-                distance[j] = distance[current] + graph[current][j];
+                dist[next] = cost;
+                pq.push(make_pair(next, -cost));
             }
         }
     }
-
-    print_solution(distance, node_count);
-
 }
 
 int main()
 {
-    int graph[node_count][node_count]=
-        {
-        {0, 1, 2, 0, 0, 0},
-        {1, 0, 0, 5, 1, 0},
-        {2, 0, 0, 2, 3, 0},
-        {0, 5, 2, 0, 2, 2},
-        {0, 1, 3, 2, 0, 1},
-        {0, 0, 0, 2, 1, 0}};
+    for(int i=1; i<=node_count; ++i)
+        dist[i] = INF;
 
-    dijkstra(graph, 0);
+    graph[1].push_back(make_pair(2,2));
+    graph[1].push_back(make_pair(3,5));
+    graph[1].push_back(make_pair(4,1));
 
+    graph[2].push_back(make_pair(1,2));
+    graph[2].push_back(make_pair(3,3));
+    graph[2].push_back(make_pair(4,2));
+
+    graph[3].push_back(make_pair(1,5));
+    graph[3].push_back(make_pair(2,3));
+    graph[3].push_back(make_pair(4,3));
+    graph[3].push_back(make_pair(5,1));
+    graph[3].push_back(make_pair(6,5));
+
+    graph[4].push_back(make_pair(1,1));
+    graph[4].push_back(make_pair(2,2));
+    graph[4].push_back(make_pair(3,3));
+    graph[4].push_back(make_pair(5,1));
+
+    graph[5].push_back(make_pair(3,1));
+    graph[5].push_back(make_pair(4,1));
+    graph[5].push_back(make_pair(6,2));
+
+    graph[6].push_back(make_pair(3,5));
+    graph[6].push_back(make_pair(5,2));
+
+    dijkstra(1);
+
+    for(int i=1; i<=node_count; ++i)
+        cout << dist[i] << " ";
     return 0;
 }
